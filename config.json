@@ -1,0 +1,20 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "baseUrl": "http://127.0.0.1:8080"
+  },
+  "auth": {
+    "username": "admin",
+    "password": "xss123456",
+    "sessionCookieName": "xss_session",
+    "sessionValue": "authenticated"
+  },
+  "paths": {
+    "static": "./static/",
+    "images": "./images/"
+  },
+  "websocket": {
+    "allowCrossOrigin": true
+  }
+}

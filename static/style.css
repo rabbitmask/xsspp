@@ -1,0 +1,421 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    line-height: 1.6;
+}
+
+/* 登录页面样式 */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+.login-container {
+    background: #2a2a2a;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-form h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #ff6b6b;
+    font-size: 1.8rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #333;
+    color: #e0e0e0;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.3);
+}
+
+.login-form button {
+    width: 100%;
+    padding: 12px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-form button:hover {
+    background: #ff5252;
+}
+
+.error-message {
+    color: #ff4444;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+/* 主页面样式 */
+.header {
+    background: #2a2a2a;
+    padding: 1rem 2rem;
+    border-bottom: 2px solid #ff6b6b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    color: #ff6b6b;
+    font-size: 1.5rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-actions code {
+    background: #333;
+    padding: 0.5rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    color: #4CAF50;
+}
+
+.header-actions button {
+    padding: 0.5rem 1rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.header-actions button:hover {
+    background: #45a049;
+}
+
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 客户端列表样式 */
+.clients-section h2 {
+    margin-bottom: 1rem;
+    color: #e0e0e0;
+}
+
+.clients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1rem;
+}
+
+.client-card {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.client-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.client-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #444;
+}
+
+.client-header strong {
+    color: #4CAF50;
+    font-family: 'Courier New', monospace;
+}
+
+.client-status {
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.client-status.online {
+    background: #4CAF50;
+    color: white;
+}
+
+.client-info {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.client-info div {
+    margin-bottom: 0.3rem;
+}
+
+.client-info strong {
+    color: #ff6b6b;
+}
+
+.client-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    padding: 0.5rem 1rem;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #1976D2;
+}
+
+.btn-danger {
+    padding: 0.5rem 1rem;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.btn-danger:hover {
+    background: #d32f2f;
+}
+
+.no-clients {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 2rem;
+    background: #2a2a2a;
+    border-radius: 8px;
+    border: 1px dashed #444;
+}
+
+/* 客户端详情页样式 */
+.client-detail {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.section {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.section h2 {
+    color: #ff6b6b;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+/* 模块网格 */
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.module-btn {
+    padding: 1rem;
+    background: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.module-btn:hover {
+    background: #4CAF50;
+    border-color: #4CAF50;
+    color: white;
+}
+
+/* 代码编辑器 */
+.code-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.code-editor textarea {
+    width: 100%;
+    height: 150px;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    resize: vertical;
+}
+
+.code-editor textarea:focus {
+    outline: none;
+    border-color: #ff6b6b;
+}
+
+/* 结果容器 */
+.results-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #1a1a1a;
+}
+
+.result-item {
+    border-bottom: 1px solid #333;
+    padding: 1rem;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-item.success {
+    border-left: 4px solid #4CAF50;
+}
+
+.result-item.error {
+    border-left: 4px solid #f44336;
+}
+
+.result-item.pending {
+    border-left: 4px solid #ff9800;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.result-task {
+    font-family: 'Courier New', monospace;
+    background: #333;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+}
+
+.result-content pre {
+    background: #0a0a0a;
+    padding: 0.5rem;
+    border-radius: 3px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.result-content .error {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.result-content .pending {
+    color: #ff9800;
+    font-style: italic;
+}
+
+.no-results {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 2rem;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+    
+    .clients-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modules-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}

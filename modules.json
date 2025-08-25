@@ -1,0 +1,148 @@
+{
+  "categories": {
+    "common_tools": {
+      "name": "常用工具",
+      "description": "常用的信息收集工具"
+    },
+    "jsonp_hijacking": {
+      "name": "JSONP劫持",
+      "description": "利用JSONP跨域漏洞获取用户信息"
+    },
+    "information_gathering": {
+      "name": "信息收集",
+      "description": "收集用户环境和浏览器信息"
+    },
+    "phishing_attacks": {
+      "name": "钓鱼攻击",
+      "description": "社会工程学钓鱼攻击模板"
+    }
+  },
+  "modules": {
+    "jsonp_detector": {
+      "name": "用户登录检测",
+      "description": "检测用户在多个网站的登录状态",
+      "file": "modules/jsonp_detector.js",
+      "category": "jsonp_hijacking"
+    },
+    "baidu_jsonp": {
+      "name": "百度账号检测",
+      "description": "通过JSONP获取用户的百度账号信息",
+      "file": "modules/baidu_jsonp.js",
+      "category": "jsonp_hijacking"
+    },
+    "qq_jsonp": {
+      "name": "QQ账号检测",
+      "description": "通过JSONP获取用户的QQ账号信息",
+      "file": "modules/qq_jsonp.js",
+      "category": "jsonp_hijacking"
+    },
+    "weibo_jsonp": {
+      "name": "微博账号检测",
+      "description": "通过JSONP获取用户的微博账号信息",
+      "file": "modules/weibo_jsonp.js",
+      "category": "jsonp_hijacking"
+    },
+    "taobao_jsonp": {
+      "name": "淘宝账号检测",
+      "description": "通过JSONP获取用户的淘宝/阿里账号信息",
+      "file": "modules/taobao_jsonp.js",
+      "category": "jsonp_hijacking"
+    },
+    "jd_jsonp": {
+      "name": "京东账号检测",
+      "description": "通过JSONP获取用户的京东账号信息",
+      "file": "modules/jd_jsonp.js",
+      "category": "jsonp_hijacking"
+    },
+    "public_ip": {
+      "name": "公网IP获取",
+      "description": "获取用户的公网IP地址及相关信息",
+      "file": "modules/public_ip.js",
+      "category": "information_gathering"
+    },
+    "local_ip": {
+      "name": "内网IP获取",
+      "description": "获取用户的内网IP地址及网络接口信息",
+      "file": "modules/local_ip.js",
+      "category": "information_gathering"
+    },
+    "camera_photo": {
+      "name": "摄像头拍照",
+      "description": "使用摄像头拍摄照片",
+      "file": "modules/camera_photo.js",
+      "category": "information_gathering"
+    },
+    "geolocation": {
+      "name": "GPS定位获取",
+      "description": "获取用户的精确地理位置信息",
+      "file": "modules/geolocation.js",
+      "category": "information_gathering"
+    },
+    "baidu_identity": {
+      "name": "百度身份获取",
+      "description": "获取用户的百度账号信息",
+      "file": "modules/baidu_identity.js",
+      "category": "information_gathering"
+    },
+    "cookie": {
+      "name": "读取 Cookie",
+      "description": "获取当前页面的所有 Cookie 信息",
+      "file": "modules/cookie.js",
+      "category": "common_tools"
+    },
+    "dom": {
+      "name": "获取页面信息",
+      "description": "获取页面基本信息，不影响页面布局",
+      "file": "modules/dom.js",
+      "category": "common_tools"
+    },
+    "formdata": {
+      "name": "表单数据",
+      "description": "获取页面中所有表单的数据",
+      "file": "modules/formdata.js",
+      "category": "common_tools"
+    },
+    "storage": {
+      "name": "存储信息",
+      "description": "获取 localStorage 和 sessionStorage 信息",
+      "file": "modules/storage.js",
+      "category": "common_tools"
+    },
+    "keylogger": {
+      "name": "键盘记录",
+      "description": "启动键盘监听，10秒后返回记录",
+      "file": "modules/keylogger.js",
+      "category": "information_gathering"
+    },
+    "screenshot": {
+      "name": "页面截图",
+      "description": "隐蔽截图并保存到服务器",
+      "file": "modules/screenshot.js",
+      "category": "common_tools"
+    },
+    "phishing_login": {
+      "name": "登录钓鱼",
+      "description": "插入仿冒的登录框获取用户凭据",
+      "file": "modules/phishing_login.js",
+      "category": "phishing_attacks"
+    },
+    "phishing_notification": {
+      "name": "通知钓鱼",
+      "description": "插入仿冒的系统通知诱导用户点击",
+      "file": "modules/phishing_notification.js",
+      "category": "phishing_attacks"
+    },
+    "phishing_flash_update": {
+      "name": "Flash更新钓鱼",
+      "description": "插入仿冒的Flash更新提示诱导用户下载恶意文件",
+      "file": "modules/phishing_flash_update.js",
+      "category": "phishing_attacks"
+    },
+    "phishing_chrome_update": {
+      "name": "Chrome更新钓鱼",
+      "description": "插入仿冒的Chrome浏览器更新提示诱导用户下载恶意文件",
+      "file": "modules/phishing_chrome_update.js",
+      "category": "phishing_attacks"
+    }
+  }
+}

