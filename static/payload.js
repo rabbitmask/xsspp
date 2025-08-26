@@ -5,7 +5,19 @@
 
     // 配置
     const config = {
-        serverUrl: 'ws://localhost:8080/ws',
+        // 动态获取当前脚本的源地址，用于确定WebSocket服务器地址
+        serverUrl: (function() {
+            // 获取当前脚本的src
+            const scripts = document.getElementsByTagName('script');
+            const currentScript = scripts[scripts.length - 1];
+            const scriptSrc = currentScript.src;
+            
+            // 从脚本URL中提取服务器地址
+            const serverUrl = scriptSrc.substring(0, scriptSrc.lastIndexOf('/'));
+            
+            // 构建WebSocket URL
+            return 'ws://' + serverUrl.split('//')[1] + '/ws';
+        })(),
         heartbeatInterval: 30000, // 30秒心跳
         reconnectInterval: 5000,  // 5秒重连
         maxReconnectAttempts: 10
